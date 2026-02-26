@@ -94,5 +94,33 @@ public class EventController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+    @PatchMapping("/{id}/price")
+    public ResponseEntity<?> updateEventPrice(
+            @PathVariable UUID id,
+            @RequestParam(required = false) Double price) {
+        if (price == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (price < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
+    }
 
+    @GetMapping("/upcoming")
+    public ResponseEntity<?> getUpcomingEvents() {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/filter/tag")
+    public ResponseEntity<?> filterByTag(@RequestParam String tag) {
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/filter/price")
+    public ResponseEntity<?> filterByPrice(
+            @RequestParam double min,
+            @RequestParam double max) {
+        return ResponseEntity.ok().build();
+    }
 }
