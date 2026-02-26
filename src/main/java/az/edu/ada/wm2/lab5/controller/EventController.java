@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -100,10 +101,10 @@ public class EventController {
     // PATCH /{id}/price
     @PatchMapping("/{id}/price")
     public ResponseEntity<Event> updatePrice(@PathVariable UUID id,
-                                             @RequestParam Double price) {
+                                            @RequestParam Double price) {
         try {
             if (price == null || price < 0) return ResponseEntity.badRequest().build();
-            Event updated = eventService.updateEventPrice(id, price);
+            Event updated = eventService.updateEventPrice(id, BigDecimal.valueOf(price));
             return ResponseEntity.ok(updated);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -140,7 +141,7 @@ public class EventController {
                                                         @RequestParam Double max) {
         try {
             if (min == null || max == null) return ResponseEntity.badRequest().build();
-            List<Event> events = eventService.getEventsByPriceRange(min, max);
+            List<Event> events = eventService.getEventsByPriceRange(BigDecimal.valueOf(min), BigDecimal.valueOf(max));
             return ResponseEntity.ok(events);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
