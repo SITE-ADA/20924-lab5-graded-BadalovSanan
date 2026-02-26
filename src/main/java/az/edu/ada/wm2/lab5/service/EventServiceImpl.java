@@ -39,7 +39,6 @@ public class EventServiceImpl implements EventService {
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
-
     @Override
     public Event updateEvent(UUID id, Event event) {
         if (!eventRepository.existsById(id)) {
@@ -55,14 +54,6 @@ public class EventServiceImpl implements EventService {
             throw new RuntimeException("Event not found with id: " + id);
         }
         eventRepository.deleteById(id);
-    }
-
-    @Override
-    public Event updateEventPrice(UUID id, BigDecimal newPrice) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
-        event.setTicketPrice(newPrice);
-        return eventRepository.save(event);
     }
 
     @Override
@@ -90,30 +81,32 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(existingEvent);
     }
 
+    // Custom methods
     @Override
     public List<Event> getEventsByTag(String tag) {
-        if (tag == null || tag.isBlank()) {
-            return List.of();
-        }
         return eventRepository.findAll().stream()
-                .filter(e -> e.getTags() != null && e.getTags().stream()
-                        .anyMatch(t -> t.equalsIgnoreCase(tag)))
+                .filter(event -> event.getTags() != null && event.getTags().contains(tag))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Event> getEventsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null) {
-            return List.of();
-        }
-        return eventRepository.findAll().stream()
-                .filter(e -> e.getEventDateTime() != null &&
-                        !e.getEventDateTime().isBefore(startDate) &&
-                        !e.getEventDateTime().isAfter(endDate))
-                .collect(Collectors.toList());
+    public List<Event> getUpcomingEvents() {
+        return List.of();
     }
 
-   
-    
+    @Override
+    public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+       return List.of();
+    }
+
+    @Override
+    public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
+        return List.of();
+    }
+
+    @Override
+    public Event updateEventPrice(UUID id, BigDecimal newPrice) {
+        return null;
+    }
 
 }
