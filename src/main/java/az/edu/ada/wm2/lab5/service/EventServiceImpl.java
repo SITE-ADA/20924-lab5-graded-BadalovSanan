@@ -39,7 +39,6 @@ public class EventServiceImpl implements EventService {
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
-
     @Override
     public Event updateEvent(UUID id, Event event) {
         if (!eventRepository.existsById(id)) {
@@ -85,27 +84,43 @@ public class EventServiceImpl implements EventService {
     // Custom methods
     @Override
     public List<Event> getEventsByTag(String tag) {
-        return List.of();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getTags() != null && event.getTags().contains(tag))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getUpcomingEvents() {
-        return List.of();
+        LocalDateTime now = LocalDateTime.now();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getEventDateTime() != null && event.getEventDateTime().isAfter(now))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
-       return List.of();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getTicketPrice() != null &&
+                        event.getTicketPrice().compareTo(minPrice) >= 0 &&
+                        event.getTicketPrice().compareTo(maxPrice) <= 0)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Event> getEventsByDateRange(LocalDateTime start, LocalDateTime end) {
-        return List.of();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getEventDateTime() != null &&
+                        !event.getEventDateTime().isBefore(start) &&
+                        !event.getEventDateTime().isAfter(end))
+                .collect(Collectors.toList());
     }
 
     @Override
     public Event updateEventPrice(UUID id, BigDecimal newPrice) {
-        return null;
+        Event existingEvent = eventRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Event not found with id: " + id));
+        existingEvent.setTicketPrice(newPrice);
+        return eventRepository.save(existingEvent);
     }
 
 }
