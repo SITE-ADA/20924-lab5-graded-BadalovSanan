@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +50,7 @@ public class EventController {
     public ResponseEntity<Event> getEventById(@PathVariable UUID id) {
         try {
             Event event = eventService.getEventById(id);
-            return new ResponseEntity<>(event, HttpStatus.OK);
+            return ResponseEntity.ok(event);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -74,7 +76,7 @@ public class EventController {
     public ResponseEntity<Event> updateEvent(@PathVariable UUID id, @RequestBody Event event) {
         try {
             Event updatedEvent = eventService.updateEvent(id, event);
-            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+            return ResponseEntity.ok(updatedEvent);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
@@ -87,40 +89,77 @@ public class EventController {
     public ResponseEntity<Event> partialUpdateEvent(@PathVariable UUID id, @RequestBody Event partialEvent) {
         try {
             Event updatedEvent = eventService.partialUpdateEvent(id, partialEvent);
-            return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+            return ResponseEntity.ok(updatedEvent);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    // PATCH /{id}/price
     @PatchMapping("/{id}/price")
-    public ResponseEntity<?> updateEventPrice(
-            @PathVariable UUID id,
-            @RequestParam(required = false) Double price) {
-        if (price == null) {
+    public ResponseEntity<Event> updatePrice(@PathVariable UUID id,
+                                             @RequestParam Double price) {
+        try {
+            if (price == null || price < 0) return ResponseEntity.badRequest().build();
+            Event updated = eventService.updateEventPrice(id, price);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
-        if (price < 0) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().build();
     }
 
+    // GET /upcoming
     @GetMapping("/upcoming")
-    public ResponseEntity<?> getUpcomingEvents() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<Event>> getUpcomingEvents() {
+        try {
+            List<Event> upcoming = eventService.getUpcomingEvents();
+            return ResponseEntity.ok(upcoming);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
+    // GET /filter/tag
     @GetMapping("/filter/tag")
-    public ResponseEntity<?> filterByTag(@RequestParam String tag) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<Event>> getEventsByTag(@RequestParam String tag) {
+        try {
+            List<Event> events = eventService.getEventsByTag(tag);
+            return ResponseEntity.ok(events);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
+    // GET /filter/price
     @GetMapping("/filter/price")
-    public ResponseEntity<?> filterByPrice(
-            @RequestParam double min,
-            @RequestParam double max) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<Event>> getEventsByPrice(@RequestParam Double min,
+                                                        @RequestParam Double max) {
+        try {
+            if (min == null || max == null) return ResponseEntity.badRequest().build();
+            List<Event> events = eventService.getEventsByPriceRange(min, max);
+            return ResponseEntity.ok(events);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // GET /filter/date
+    @GetMapping("/filter/date")
+    public ResponseEntity<List<Event>> getEventsByDate(@RequestParam String start,
+                                                       @RequestParam String end) {
+        try {
+            LocalDateTime startTime = LocalDateTime.parse(start);
+            LocalDateTime endTime = LocalDateTime.parse(end);
+            List<Event> events = eventService.getEventsByDateRange(startTime, endTime);
+            return ResponseEntity.ok(events);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
