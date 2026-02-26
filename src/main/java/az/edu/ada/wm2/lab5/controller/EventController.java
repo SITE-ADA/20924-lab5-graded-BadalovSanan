@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -96,28 +95,4 @@ public class EventController {
         }
     }
 
-    // Filter by tag
-@GetMapping("/filter/tag")
-public ResponseEntity<List<Event>> getEventsByTag(@RequestParam String tag) {
-    List<Event> events = eventService.getEventsByTag(tag);
-    return new ResponseEntity<>(events, HttpStatus.OK);
-}
-
-    @GetMapping("/filter/price")
-    public ResponseEntity<List<Event>> getEventsByPriceRange(@RequestParam BigDecimal min, @RequestParam BigDecimal max) {
-        List<Event> events = eventService.getEventsByPriceRange(min, max);
-        return new ResponseEntity<>(events, HttpStatus.OK);
-    }
-
-    @PatchMapping("/{id}/price")
-    public ResponseEntity<Event> updateEventPrice(@PathVariable UUID id, @RequestParam BigDecimal price) {
-        try {
-            Event updated = eventService.updateEventPrice(id, price);
-            return new ResponseEntity<>(updated, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
 }
