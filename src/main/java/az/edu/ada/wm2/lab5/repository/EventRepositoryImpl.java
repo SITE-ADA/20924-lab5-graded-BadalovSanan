@@ -39,13 +39,8 @@ public class EventRepositoryImpl implements EventRepository {
         return eventStore.containsKey(id);
     }
 
-    public List<Event> getEventsByTag(String tag) {
-        List<Event> eventsWithTag = new ArrayList<>();
-        for (Event event : eventStore.values()) {
-            if (event.getTags() != null && event.getTags().contains(tag)) {
-                eventsWithTag.add(event);
-            }
-        }
-        return eventsWithTag;
+    @GetMapping("/filter/tag")
+    public List<Event> getEventsByTag(@RequestParam String tag) {
+        return eventRepository.getEventsByTag(tag);
     }
 }
