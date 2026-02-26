@@ -38,4 +38,14 @@ public class EventRepositoryImpl implements EventRepository {
     public boolean existsById(UUID id) {
         return eventStore.containsKey(id);
     }
+
+    public List<Event> getEventsByTag(String tag) {
+        List<Event> eventsWithTag = new ArrayList<>();
+        for (Event event : eventStore.values()) {
+            if (event.getTags() != null && event.getTags().contains(tag)) {
+                eventsWithTag.add(event);
+            }
+        }
+        return eventsWithTag;
+    }
 }
