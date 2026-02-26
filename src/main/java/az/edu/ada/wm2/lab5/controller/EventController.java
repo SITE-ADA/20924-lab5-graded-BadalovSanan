@@ -39,7 +39,7 @@ public class EventController {
     public ResponseEntity<List<Event>> getAllEvents() {
         try {
             List<Event> events = eventService.getAllEvents();
-            return new ResponseEntity<>(events, HttpStatus.OK);
+            return ResponseEntity.ok(events);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
